@@ -1,24 +1,120 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
+apply plugin: "kotlin-android-extensions"
+apply plugin: "kotlin-kapt"
 apply plugin: 'io.fabric'
 
+def versionMajor = 0
+def versionMinor = 44
+def versionPatch = 14
+def versionBuild = getGitCommitCount()
+def versionTag = "" // bump for dogfood builds, public betas, etc.
+def getGitCommitCount() {
+    def result = 'git rev-list --first-parent --count HEAD'.execute([], project.rootDir).text.trim()
+    return result.isInteger() ? result.toInteger() : 0
+}
+
 android {
+
     compileSdkVersion 26
     buildToolsVersion "26.0.0"
+
     defaultConfig {
         applicationId "com.dwarvesf.griffin_survey"
-        minSdkVersion 16
+        minSdkVersion 17
         targetSdkVersion 26
-        versionCode 1
-        versionName "1.0"
+
+        versionName "${versionMajor}.${versionMinor}.${versionPatch}"
+        versionCode versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100 + versionBuild
+
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+    packagingOptions {
+        exclude 'META-INF/rxjava.properties'
+    }
+
+    lintOptions {
+        disable 'InvalidPackage'
+    }
+
+    applicationVariants.all { variant ->
+
+        variant.outputs.each { output ->
+            def date = new Date();
+            def formattedDate = date.format('yyyyMMdd')
+            def replaced = "app-debug.apk"
+
+            if (buildType.name == "release") {
+                replaced = "app-release.apk"
+            }
+
+            def gitBranch = 'git rev-parse --abbrev-ref HEAD'.execute([], project.rootDir).text.trim()
+            switch (gitBranch) {
+                case "develop":
+                    versionTag = "-SNAPSHOT-"
+                    break
+
+                default:
+                    versionTag = ""
+                    break
+            }
+
+            def outputName = "griffin-survey-" + defaultConfig.versionName + versionTag + "." + formattedDate + ".apk"
+
+            output.outputFile = new File(
+                    output.outputFile.parent,
+                    output.outputFile.name.replace(replaced, outputName)
+            )
         }
     }
+
+    signingConfigs {
+        release
+    }
+
+    buildTypes {
+        release {
+
+            minifyEnabled false
+            shrinkResources false
+
+            debuggable false
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            zipAlignEnabled true
+
+            // For Crashlytics release
+            ext.betaDistributionReleaseNotesFilePath = "release/beta/release_notes.txt"
+            ext.betaDistributionEmailsFilePath = "release/beta/beta_distribution_emails.txt"
+            ext.betaDistributionGroupAliasesFilePath = "release/beta/group_aliases.txt"
+            buildConfigField "boolean", "USE_CRASHLYTICS", "true"
+            ext.enableCrashlytics = true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+
+        debug {
+            minifyEnabled false
+            debuggable true
+            buildConfigField "boolean", "USE_CRASHLYTICS", "false"
+            ext.enableCrashlytics = false
+        }
+    }
+
+    productFlavors {
+        dev {
+            // Enable pre-dexing to produce an APK that can be tested on
+            // Android 5.0+ without the time-consuming DEX build processes.
+            minSdkVersion 21
+        }
+        prod {
+            // The actual minSdkVersion for the production version.
+            minSdkVersion 17
+        }
+    }
+}
+
+kapt {
+    generateStubs = true
 }
 
 dependencies {
@@ -34,6 +130,24 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
 }
-repositories {
-    mavenCentral()
+
+task mergeReleaseBranchAndSetTagMaster {
+
+    def versionName = "${versionMajor}.${versionMinor}.${versionPatch}"
+
+    doLast {
+
+        exec { commandLine "git", "checkout", "master" }
+        exec { commandLine "git", "pull", "origin", "master" }
+        exec { commandLine "git", "merge", "release/v" + versionName }
+        exec { commandLine "git", "tag", "-a", "v" + versionName, "-m", "version " + versionName }
+        exec { commandLine "git", "push", "--tags" }
+        exec { commandLine "git", "remote", "set-url", "origin", "git@git.dwarvesf.com:griffin-survey/android.git" }
+        exec { commandLine "git", "push", "-f", "origin", "master" }
+        exec { commandLine "git", "checkout", "develop" }
+        exec { commandLine "git", "pull", "origin", "develop" }
+        exec { commandLine "git", "merge", "release/v" + versionName }
+        exec { commandLine "git", "remote", "set-url", "origin", "git@git.dwarvesf.com:griffin-survey/android.git" }
+        exec { commandLine "git", "push", "-f", "origin", "develop" }
+    }
 }
