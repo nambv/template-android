@@ -1,7 +1,8 @@
-package com.dwarvesf.griffin_survey
+package com.dwarvesf.griffin_survey.view
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import com.dwarvesf.griffin_survey.R
 
 class MainActivity : AppCompatActivity() {
 

@@ -6,6 +6,7 @@ import android.net.ConnectivityManager
 import android.support.annotation.StringRes
 import android.support.design.widget.Snackbar
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import com.dwarvesf.griffin_survey.R
 import com.dwarvesf.griffin_survey.model.ErrorBody
@@ -56,4 +57,9 @@ fun createMessage(context: Context, throwable: Throwable, retrofit: Retrofit): S
 fun isNetworkConnected(context: Context): Boolean {
     val activeNetwork = (context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager).activeNetworkInfo
     return activeNetwork != null && activeNetwork.isConnectedOrConnecting
+}
+
+fun Activity.hideSoftKeyboard() {
+    val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+    inputMethodManager.hideSoftInputFromWindow(currentFocus!!.windowToken, 0)
 }

@@ -15,13 +15,15 @@
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="bd3a318db1f21bd4bb197bf552f2360053333bc1" />
-        <activity android:name=".MainActivity">
+
+        <activity android:name=".view.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".view.login.LoginActivity"></activity>
     </application>
 
 </manifest>

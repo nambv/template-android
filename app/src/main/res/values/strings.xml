@@ -1,5 +1,16 @@
 <resources>
     <string name="app_name">GriffinSurvey</string>
+
+    <!-- Key Strings -->
     <string name="key_user_access_token">key_user_access_token</string>
+
+    <!-- Label Strings -->
+    <string name="label_login">Login</string>
+
+    <!-- Hint Strings -->
+    <string name="hint_username">Username</string>
+    <string name="hint_password">Password</string>
+
+    <!-- Message Strings -->
     <string name="msg_connection_timeout">Cannot connect to server. Please check your connection strength and try again</string>
 </resources>
