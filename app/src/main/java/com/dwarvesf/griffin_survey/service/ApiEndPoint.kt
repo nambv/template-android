@@ -1,6 +1,6 @@
-package com.dwarvesf.griffin_survey
+package com.dwarvesf.griffin_survey.service
 
-object APiEndPoint {
+object ApiEndPoint {
 
     const val STAGING_API = "http://griffin.dwarvesf.com"
 

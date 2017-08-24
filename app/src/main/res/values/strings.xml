@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">GriffinSurvey</string>
+    <string name="key_user_access_token">key_user_access_token</string>
+    <string name="msg_connection_timeout">Cannot connect to server. Please check your connection strength and try again</string>
 </resources>
