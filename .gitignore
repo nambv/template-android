@@ -1,0 +1,16 @@
+*.iml
+.gradle
+/local.properties
+/.idea/
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+
+/app/fabric.properties
+/app/src/main/res/values/secret.xml
+/app/src/main/res/values/com_crashlytics_export_strings.xml
+libs/
+src/main/assets/
+src/main/res/values/com_crashlytics_export_strings.xml
+/app/src/main/assets/
